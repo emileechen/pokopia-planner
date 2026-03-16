@@ -2,12 +2,12 @@
 
 // ─── Tile Definitions (Pokopia palette) ───────────────────────────────────────
 const TILES = [
-  { id: 'field-grass',       label: 'Field grass',        icon: '/tiles/field-grass.webp',       top: '#8CC840', side: '#DDB888', dark: '#C8A070' },
-  { id: 'ordinary-soil',    label: 'Ordinary soil',      icon: '/tiles/ordinary-soil.webp',     top: '#E8C8A0', side: '#DDB888', dark: '#C8A070' },
-  { id: 'mossy-soil',        label: 'Mossy soil',         icon: '/tiles/mossy-soil.webp',        top: '#C8CC48', side: '#B8B840', dark: '#A0A030' },
-  { id: 'hardwood-flooring', label: 'Hardwood flooring', icon: '/tiles/hardwood-flooring.webp', top: '#E0A838', side: '#D09830', dark: '#B88028' },
-  { id: 'wooden-wall',      label: 'Wooden wall',       icon: '/tiles/wooden-wall.webp',      top: '#C89030', side: '#B88028', dark: '#986818' },
-  { id: 'cobblestone-wall', label: 'Cobblestone wall',  icon: '/tiles/cobblestone-wall.webp', top: '#A0A098', side: '#888880', dark: '#707068' },
+  { id: 'field-grass',       label: 'Field grass',        icon: 'tiles/field-grass.webp',       top: '#8CC840', side: '#DDB888', dark: '#C8A070' },
+  { id: 'ordinary-soil',    label: 'Ordinary soil',      icon: 'tiles/ordinary-soil.webp',     top: '#E8C8A0', side: '#DDB888', dark: '#C8A070' },
+  { id: 'mossy-soil',        label: 'Mossy soil',         icon: 'tiles/mossy-soil.webp',        top: '#C8CC48', side: '#B8B840', dark: '#A0A030' },
+  { id: 'hardwood-flooring', label: 'Hardwood flooring', icon: 'tiles/hardwood-flooring.webp', top: '#E0A838', side: '#D09830', dark: '#B88028' },
+  { id: 'wooden-wall',      label: 'Wooden wall',       icon: 'tiles/wooden-wall.webp',      top: '#C89030', side: '#B88028', dark: '#986818' },
+  { id: 'cobblestone-wall', label: 'Cobblestone wall',  icon: 'tiles/cobblestone-wall.webp', top: '#A0A098', side: '#888880', dark: '#707068' },
 ];
 
 const TILE_MAP = Object.fromEntries(TILES.map(t => [t.id, t]));
