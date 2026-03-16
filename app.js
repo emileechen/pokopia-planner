@@ -223,6 +223,24 @@ function drawIsoGrid() {
     const tile = TILE_MAP[activeTile];
     if (tile) drawIsoTile(ctx, ghostCell.col, ghostCell.row, activeLayer, tile, true);
   }
+
+  // Hover ground outline
+  if (ghostCell) {
+    const { x, y } = isoProject(ghostCell.col, ghostCell.row, 0);
+    const z = isoZoom, tw = ISO_TW * z, th = ISO_TH * z;
+    ctx.beginPath();
+    ctx.moveTo(x,          y);
+    ctx.lineTo(x + tw / 2, y + th / 2);
+    ctx.lineTo(x,          y + th);
+    ctx.lineTo(x - tw / 2, y + th / 2);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(30,58,16,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
 }
 
 // ─── Top-Down Drawing ─────────────────────────────────────────────────────────
@@ -397,7 +415,8 @@ function isoMouseToGrid(mx, my) {
   const z  = isoZoom;
   const tw = ISO_TW * z, th = ISO_TH * z;
   const dx = mx - cx;
-  const dy = my - cy + activeLayer * ISO_DEPTH * z;
+  const dp = ISO_DEPTH * z;
+  const dy = my - cy + activeLayer * dp - th / 2 - dp;
   const rc = Math.round((dx / (tw / 2) + dy / (th / 2)) / 2);
   const rr = Math.round((dy / (th / 2) - dx / (tw / 2)) / 2);
   const [col, row] = unrotateGrid(rc, rr);
@@ -680,9 +699,14 @@ document.getElementById('file-input').addEventListener('change', (e) => {
 });
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+// Fill layer 0 with field grass
+for (let r = 0; r < GRID_H; r++)
+  for (let c = 0; c < GRID_W; c++)
+    voxelData[0][r][c] = 'field-grass';
+
 buildPalette();
 buildLegend();
 isoCanvas.style.cursor = tdCanvas.style.cursor = 'crosshair';
-setLayer(0);
+setLayer(1);
 resizeCanvases();
 showToast('Welcome to Pokopia Planner 🌿');
