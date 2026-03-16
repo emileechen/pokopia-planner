@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokopia Planner 🌿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Pokopia palette (from cover art) ── */
+      --logo-gold:     #F5C800;
+      --logo-green:    #6DC040;
+      --logo-green-d:  #3A8020;
+      --logo-blush:    #F8A0B8;
+      --poke-red:      #E83030;
+      --poke-blue:     #3080E0;
+
+      --grass-light:   #80C84A;
+      --grass-mid:     #58A030;
+      --grass-dark:    #307820;
+      --soil-light:    #C8A060;
+      --soil-mid:      #9A7038;
+      --soil-dark:     #705020;
+
+      /* ── UI roles ── */
+      --bg:            #EEF7E4;
+      --panel:         #FAFFF4;
+      --panel2:        #F3FAE8;
+      --border:        #B8D898;
+      --border-d:      #7AB858;
+      --text:          #1E3A10;
+      --text-sm:       #527838;
+      --header-bg:     #58A030;
+      --header-bd:     #307820;
+      --accent:        #F5C800;
+      --accent-d:      #C89800;
+      --danger:        #E83030;
+      --radius:        12px;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+    }
+
+    /* ── App Shell ── */
+    #app {
+      display: grid;
+      grid-template-columns: 196px 1fr 172px;
+      grid-template-rows: 52px 1fr;
+      grid-template-areas:
+        "header  header  header"
+        "tools   iso     tools2";
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ── Header ── */
+    #header {
+      grid-area: header;
+      background: var(--header-bg);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      border-bottom: 3px solid var(--header-bd);
+    }
+    #logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      color: #fff;
+      text-shadow: 0 2px 0 var(--header-bd), 0 0 12px rgba(0,0,0,0.15);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    #logo .gold  { color: var(--logo-gold); }
+    #logo .ball  { font-size: 16px; }
+
+    #layer-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 100px;
+      padding: 4px 10px;
+    }
+    #layer-controls label {
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.06em;
+    }
+    #layer-display {
+      font-family: 'Fredoka One', cursive;
+      font-size: 18px;
+      color: var(--logo-gold);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+      min-width: 22px;
+      text-align: center;
+    }
+    .layer-btn {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s;
+      line-height: 1;
+    }
+    .layer-btn:hover { background: rgba(255,255,255,0.32); }
+
+    #rotate-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 100px;
+      padding: 4px 8px;
+    }
+
+    .header-pills {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .hpill {
+      padding: 5px 13px;
+      border-radius: 100px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s, filter 0.12s;
+      white-space: nowrap;
+    }
+    .hpill:hover  { transform: translateY(-1px); filter: brightness(1.07); }
+    .hpill:active { transform: translateY(0px);  filter: brightness(0.95); }
+    .hpill-undo  { background: #F0E8D0;   color: var(--text); }
+    .hpill-save  { background: var(--logo-gold);    color: #5a3800; }
+    .hpill-load  { background: #60B8E8; color: #003860; }
+    .hpill-clear { background: #ffe0e0;             color: var(--danger); }
+
+    /* ── Left Panel ── */
+    #tools {
+      grid-area: tools;
+      background: var(--panel);
+      border-right: 2px solid var(--border);
+      padding: 12px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* ── Right Panel ── */
+    #tools2 {
+      grid-area: tools2;
+      background: var(--panel);
+      border-left: 2px solid var(--border);
+      padding: 12px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 13px;
+      color: var(--grass-dark);
+      letter-spacing: 0.04em;
+      padding-bottom: 5px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* ── Tile Palette ── */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+    .tile-btn {
+      aspect-ratio: 1;
+      border-radius: 9px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 17px;
+      transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+    }
+    .tile-btn:hover { transform: scale(1.09); }
+    .tile-btn.selected {
+      border-color: var(--grass-dark);
+      box-shadow: 0 0 0 3px rgba(48,120,32,0.22);
+      transform: scale(1.06);
+    }
+    .tile-icon {
+      width: 60%;
+      height: auto;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+    .tile-label {
+      font-size: 7.5px;
+      font-weight: 800;
+      text-align: center;
+      color: rgba(0,0,0,0.45);
+      line-height: 1;
+    }
+
+
+    /* ── Stats ── */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-sm);
+      font-weight: 600;
+    }
+    .stat-val {
+      font-family: 'Fredoka One', cursive;
+      font-size: 15px;
+      color: var(--grass-dark);
+    }
+
+    /* ── Shortcuts ── */
+    .shortcut-list { display: flex; flex-direction: column; gap: 4px; }
+    .sc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-sm);
+    }
+    .kbd {
+      background: #F0E8D0;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--text);
+      font-family: 'Nunito', monospace;
+    }
+
+    /* ── Legend ── */
+    #legend { display: flex; flex-direction: column; gap: 4px; }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--text-sm);
+      font-weight: 600;
+    }
+    .legend-icon {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      object-fit: cover;
+      image-rendering: pixelated;
+      flex-shrink: 0;
+    }
+
+    /* ── Viewport (main area) ── */
+    #viewport {
+      grid-area: iso;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── View panes ── */
+    .view-pane {
+      position: absolute;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    .view-pane canvas { position: absolute; top: 0; left: 0; }
+
+    .view-pane.view-main {
+      inset: 0;
+      z-index: 1;
+    }
+    .view-pane.view-mini {
+      bottom: 12px;
+      left: 12px;
+      width: 180px;
+      height: 180px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    }
+
+    #iso-container {
+      background: linear-gradient(175deg, #A8D8F0 0%, #C8ECF8 30%, #D8F0C0 65%, #EEF7E4 100%);
+    }
+    #topdown-container {
+      background: var(--panel2);
+    }
+
+    .view-label {
+      position: absolute;
+      top: 10px; left: 12px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 12px;
+      color: var(--grass-dark);
+      background: rgba(255,255,255,0.78);
+      padding: 3px 11px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+    .view-mini .view-label {
+      top: 5px; left: 6px;
+      font-size: 9px;
+      padding: 2px 8px;
+    }
+
+    /* ── Swap button ── */
+    #swap-view-btn {
+      position: absolute;
+      top: 5px; right: 6px;
+      z-index: 11;
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.85);
+      color: var(--grass-dark);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: background 0.12s, transform 0.1s;
+      line-height: 1;
+      padding: 0;
+    }
+    #swap-view-btn:hover { background: rgba(255,255,255,1); transform: scale(1.1); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(56px);
+      background: var(--text);
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 100px;
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header id="header">
+    <div id="logo">
+      <span class="ball">🌿</span> <span class="gold">Pokopia</span> Planner
+    </div>
+
+    <div id="layer-controls">
+      <label>LAYER</label>
+      <button class="layer-btn" id="layer-down">▼</button>
+      <div id="layer-display">0</div>
+      <button class="layer-btn" id="layer-up">▲</button>
+    </div>
+
+    <div id="rotate-controls">
+      <button class="layer-btn" id="rotate-left" title="Rotate left (Q)">↺</button>
+      <button class="layer-btn" id="rotate-right" title="Rotate right (E)">↻</button>
+    </div>
+
+    <div class="header-pills">
+      <button class="hpill hpill-undo"  onclick="APP.undo()">↩ Undo</button>
+      <button class="hpill hpill-save"  onclick="APP.save()">💾 Save</button>
+      <button class="hpill hpill-load"  onclick="APP.load()">📂 Load</button>
+      <button class="hpill hpill-clear" onclick="APP.confirmClear()">🗑 Clear</button>
+    </div>
+  </header>
+
+  <aside id="tools">
+    <div class="section-title">🧱 Tiles</div>
+    <div class="tile-grid" id="tile-palette"></div>
+  </aside>
+
+  <main id="viewport">
+    <div id="iso-container" class="view-pane view-main">
+      <canvas id="iso-canvas"></canvas>
+      <div class="view-label">🏔 Isometric</div>
+    </div>
+    <div id="topdown-container" class="view-pane view-mini">
+      <canvas id="topdown-canvas"></canvas>
+      <div class="view-label">🗺 Layer <span id="td-layer-label">0</span></div>
+      <button id="swap-view-btn" title="Swap views">&#8645;</button>
+    </div>
+  </main>
+
+  <aside id="tools2">
+    <div class="section-title">📊 Stats</div>
+    <div class="stat-row"><span>Tiles placed</span><span class="stat-val" id="stat-tiles">0</span></div>
+    <div class="stat-row"><span>Layers used</span><span class="stat-val" id="stat-layers">0</span></div>
+    <div class="stat-row"><span>Active layer</span><span class="stat-val" id="stat-layer">0</span></div>
+
+    <div class="section-title">⌨️ Keys</div>
+    <div class="shortcut-list">
+      <div class="sc-row"><span>Place</span><span class="kbd">left click</span></div>
+      <div class="sc-row"><span>Erase</span><span class="kbd">right click</span></div>
+      <div class="sc-row"><span>Line</span><span class="kbd">Shift + drag</span></div>
+      <div class="sc-row"><span>Rect</span><span class="kbd">Ctrl + drag</span></div>
+      <div class="sc-row"><span>Pan</span><span class="kbd">middle drag</span></div>
+      <div class="sc-row"><span>Layer ±</span><span class="kbd">W / S</span></div>
+      <div class="sc-row"><span>Undo</span><span class="kbd">⌘Z</span></div>
+      <div class="sc-row"><span>Zoom</span><span class="kbd">scroll</span></div>
+      <div class="sc-row"><span>Rotate</span><span class="kbd">Q / E</span></div>
+      <div class="sc-row"><span>Layer focus</span><span class="kbd">H</span></div>
+      <div class="sc-row"><span>Swap views</span><span class="kbd">Space</span></div>
+    </div>
+
+    <div class="section-title">🗺 Legend</div>
+    <div id="legend"></div>
+  </aside>
+
+</div>
+
+<div id="toast"></div>
+<input type="file" id="file-input" accept=".json" style="display:none" />
+<script type="module" src="./app.js"></script>
+</body>
+</html>
